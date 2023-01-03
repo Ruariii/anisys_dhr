@@ -21,7 +21,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:jqtnnhj2@localhost/DHR_834
 app.config['SECRET_KEY'] = os.urandom(12)
 db = SQLAlchemy()
 db.init_app(app)
-
 class dhr_asm_834_1111(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customerPO = db.Column(db.VARCHAR(10))
@@ -42,6 +41,45 @@ class dhr_asm_834_1111(db.Model):
 app_ctx.push()
 db.create_all()
 app_ctx.pop()
+
+class dhr_asm_834_1188(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    customerPO = db.Column(db.VARCHAR(10))
+    internalMFR = db.Column(db.VARCHAR(50))
+    productREF = db.Column(db.VARCHAR(20))
+    totalQTY = db.Column(db.Integer)
+    manufacturingVER = db.Column(db.VARCHAR(50))
+    manufacturedBY = db.Column(db.VARCHAR(3))
+    approvedBY = db.Column(db.VARCHAR(3))
+    comments = db.Column(db.VARCHAR(200))
+    manufactureDATE = db.Column(db.VARCHAR(20))
+    LOTno = db.Column(db.VARCHAR(20))
+    expiryDATE = db.Column(db.VARCHAR(20))
+    GTIN = db.Column(db.VARCHAR(14))
+    UDI = db.Column(db.VARCHAR(70))
+app_ctx.push()
+db.create_all()
+app_ctx.pop()
+
+class dhr_asm_834_1190(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    customerPO = db.Column(db.VARCHAR(10))
+    internalMFR = db.Column(db.VARCHAR(50))
+    productREF = db.Column(db.VARCHAR(20))
+    totalQTY = db.Column(db.Integer)
+    manufacturingVER = db.Column(db.VARCHAR(50))
+    manufacturedBY = db.Column(db.VARCHAR(3))
+    approvedBY = db.Column(db.VARCHAR(3))
+    comments = db.Column(db.VARCHAR(200))
+    manufactureDATE = db.Column(db.VARCHAR(20))
+    LOTno = db.Column(db.VARCHAR(20))
+    expiryDATE = db.Column(db.VARCHAR(20))
+    GTIN = db.Column(db.VARCHAR(14))
+    UDI = db.Column(db.VARCHAR(70))
+app_ctx.push()
+db.create_all()
+app_ctx.pop()
+
 class input_1111(FlaskForm):
     customerPO = StringField('Customer purchase order')
     internalMFR = StringField('Internal MFR order', validators=[DataRequired()])
@@ -51,12 +89,23 @@ class input_1111(FlaskForm):
     manufacturedBY = StringField('Manufactured by', validators=[DataRequired()])
     approvedBY = StringField('Approved by', validators=[DataRequired()])
     comments = StringField('Comments')
-    manufactureDATE = StringField('Manufacture Date', validators=[DataRequired()])
+    manufactureDATE = StringField('Manufacture Date (YYMDD)', validators=[DataRequired()])
     LOTno = StringField('LOT no', validators=[DataRequired()])
     submit = SubmitField('Add to database')
 
-@app.route('/', methods=['GET', 'POST'])
-def form():
+
+@app.route('/')
+def home():
+    last1111 = str(db.session.query(dhr_asm_834_1111.manufactureDATE).order_by(dhr_asm_834_1111.id.desc()).first())
+    last1111str = f'{last1111[2]}{last1111[3]}-{last1111[4]}{last1111[5]}-{last1111[6]}{last1111[7]}'
+    last1188 = str(db.session.query(dhr_asm_834_1188.manufactureDATE).order_by(dhr_asm_834_1188.id.desc()).first())
+    last1188str = f'{last1188[2]}{last1188[3]}-{last1188[4]}{last1188[5]}-{last1188[6]}{last1188[7]}'
+    last1190 = str(db.session.query(dhr_asm_834_1190.manufactureDATE).order_by(dhr_asm_834_1190.id.desc()).first())
+    last1190str = f'{last1190[2]}{last1190[3]}-{last1190[4]}{last1190[5]}-{last1190[6]}{last1190[7]}'
+    return render_template('home.html', last1190=last1190str, last1111=last1111str, last1188=last1188str)
+
+@app.route('/1111', methods=['GET', 'POST'])
+def form1111():
     form = input_1111()
     items = db.session.query(dhr_asm_834_1111).order_by(dhr_asm_834_1111.id.desc()).all()
     appCodes = pd.read_csv('sheath_app_codes.csv')
@@ -84,8 +133,8 @@ def form():
         manDate = item.manufactureDATE
         mdY = int(manDate[1])
         threeYears = mdY+3
-        expDate = f'{manDate[0]}{threeYears}-{manDate[3]}{manDate[4]}-{manDate[6]}{manDate[7]}'
-        expDateUDI = expDate[0]+expDate[1]+expDate[3]+expDate[4]+expDate[6]+expDate[7]
+        expDate = f'{manDate[0]}{threeYears}{manDate[2]}{manDate[3]}{manDate[4]}{manDate[5]}'
+        expDateUDI = expDate[0]+expDate[1]+expDate[2]+expDate[3]+expDate[4]+expDate[5]
         gtin = '05060710360042'
 
         for i in range(0,batch):
@@ -117,12 +166,12 @@ def form():
         db.session.commit()
 
         # Redirect to the form page
-        return redirect(url_for('form'))
+        return redirect(url_for('form1111'))
 
     return render_template('1111.html', form=form, items=items, appCodeList=appCodeList, lastID=int(lastID.id))
 
-@app.route('/delete_record/<record_id>', methods=['GET', 'DELETE'])
-def delete_record(record_id):
+@app.route('/delete_record1111/<record_id>', methods=['GET', 'DELETE'])
+def delete_record1111(record_id):
     #connect to database
     connection = mysql.connector.connect(user='root', password='jqtnnhj2', host='localhost', database='DHR_834_1190')
     cursor = connection.cursor()
@@ -130,7 +179,149 @@ def delete_record(record_id):
     cursor.execute(sql_delete_query, (record_id, ))
     connection.commit()
     connection.close()
-    return redirect(url_for('form'))
+    return redirect(url_for('form1111'))
+
+@app.route('/1188', methods=['GET', 'POST'])
+def form1188():
+    form = input_1111()
+    items = db.session.query(dhr_asm_834_1188).order_by(dhr_asm_834_1188.id.desc()).all()
+    lastID = db.session.query(dhr_asm_834_1188.id) \
+        .order_by(dhr_asm_834_1188.id.desc()).limit(1).first()
+    nextID = int(lastID.id)+1
+    if form.validate_on_submit():
+        # Create a new protect_pro_sheaths object and set its attributes
+        # to the form data
+        item = dhr_asm_834_1188(
+            customerPO=form.customerPO.data,
+            internalMFR=form.internalMFR.data,
+            productREF=form.productREF.data,
+            totalQTY=form.totalQTY.data,
+            manufacturingVER=form.manufacturingVER.data,
+            manufacturedBY=form.manufacturedBY.data,
+            approvedBY=form.approvedBY.data,
+            comments=form.comments.data,
+            manufactureDATE=form.manufactureDATE.data,
+            LOTno=form.LOTno.data
+        )
+        batch = int(item.totalQTY)
+        lot = item.LOTno
+        manDate = item.manufactureDATE
+        mdY = int(manDate[1])
+        threeYears = mdY+3
+        expDate = f'{manDate[0]}{threeYears}{manDate[2]}{manDate[3]}{manDate[4]}{manDate[5]}'
+        expDateUDI = expDate[0] + expDate[1] + expDate[2] + expDate[3] + expDate[4] + expDate[5]
+        gtin = '05060710360011'
+
+        for i in range(0,batch):
+            dbID = nextID + i
+            udi = f'(01){gtin}(10){lot}(17){expDateUDI}'
+            item_info = {
+                'id': dbID,
+                'customerPO': request.form['customerPO'],
+                'internalMFR': request.form['internalMFR'],
+                'productREF': request.form['productREF'],
+                'totalQTY': batch,
+                'manufacturingVER': request.form['manufacturingVER'],
+                'manufacturedBY': request.form['manufacturedBY'],
+                'approvedBY': request.form['approvedBY'],
+                'comments': request.form['comments'],
+                'manufactureDATE': request.form['manufactureDATE'],
+                'LOTno': request.form['LOTno'],
+                'expiryDATE': expDate,
+                'GTIN': gtin,
+                'UDI': udi,
+            }
+            item_obj = dhr_asm_834_1188(**item_info)
+            # Add the item to the database
+            db.session.add(item_obj)
+        db.session.commit()
+
+        # Redirect to the form page
+        return redirect(url_for('form1188'))
+
+    return render_template('1188.html', form=form, items=items, appCodeList=appCodeList, lastID=int(lastID.id))
+
+@app.route('/delete_record1188/<record_id>', methods=['GET', 'DELETE'])
+def delete_record1188(record_id):
+    #connect to database
+    connection = mysql.connector.connect(user='root', password='jqtnnhj2', host='localhost', database='DHR_834_1190')
+    cursor = connection.cursor()
+    sql_delete_query = """DELETE FROM dhr_asm_834_1188 WHERE id = %s"""
+    cursor.execute(sql_delete_query, (record_id, ))
+    connection.commit()
+    connection.close()
+    return redirect(url_for('form1188'))
+
+@app.route('/1190', methods=['GET', 'POST'])
+def form1190():
+    form = input_1111()
+    items = db.session.query(dhr_asm_834_1190).order_by(dhr_asm_834_1190.id.desc()).all()
+    lastID = db.session.query(dhr_asm_834_1190.id) \
+        .order_by(dhr_asm_834_1190.id.desc()).limit(1).first()
+    nextID = int(lastID.id)+1
+    if form.validate_on_submit():
+        # Create a new protect_pro_sheaths object and set its attributes
+        # to the form data
+        item = dhr_asm_834_1190(
+            customerPO=form.customerPO.data,
+            internalMFR=form.internalMFR.data,
+            productREF=form.productREF.data,
+            totalQTY=form.totalQTY.data,
+            manufacturingVER=form.manufacturingVER.data,
+            manufacturedBY=form.manufacturedBY.data,
+            approvedBY=form.approvedBY.data,
+            comments=form.comments.data,
+            manufactureDATE=form.manufactureDATE.data,
+            LOTno=form.LOTno.data
+        )
+        batch = int(item.totalQTY)
+        lot = item.LOTno
+        manDate = item.manufactureDATE
+        mdY = int(manDate[1])
+        threeYears = mdY+3
+        expDate = f'{manDate[0]}{threeYears}{manDate[2]}{manDate[3]}{manDate[4]}{manDate[5]}'
+        expDateUDI = expDate[0] + expDate[1] + expDate[2] + expDate[3] + expDate[4] + expDate[5]
+        gtin = '05060710360059'
+
+        for i in range(0,batch):
+            dbID = nextID+i
+            udi = f'(01){gtin}(10){lot}(17){expDateUDI}'
+            item_info = {
+                'id': dbID,
+                'customerPO': request.form['customerPO'],
+                'internalMFR': request.form['internalMFR'],
+                'productREF': request.form['productREF'],
+                'totalQTY': batch,
+                'manufacturingVER': request.form['manufacturingVER'],
+                'manufacturedBY': request.form['manufacturedBY'],
+                'approvedBY': request.form['approvedBY'],
+                'comments': request.form['comments'],
+                'manufactureDATE': request.form['manufactureDATE'],
+                'LOTno': request.form['LOTno'],
+                'expiryDATE': expDate,
+                'GTIN': gtin,
+                'UDI': udi,
+            }
+            item_obj = dhr_asm_834_1190(**item_info)
+            # Add the item to the database
+            db.session.add(item_obj)
+        db.session.commit()
+
+        # Redirect to the form page
+        return redirect(url_for('form1190'))
+
+    return render_template('1190.html', form=form, items=items, appCodeList=appCodeList, lastID=int(lastID.id))
+
+@app.route('/delete_record1190/<record_id>', methods=['GET', 'DELETE'])
+def delete_record1190(record_id):
+    #connect to database
+    connection = mysql.connector.connect(user='root', password='jqtnnhj2', host='localhost', database='DHR_834_1190')
+    cursor = connection.cursor()
+    sql_delete_query = """DELETE FROM dhr_asm_834_1190 WHERE id = %s"""
+    cursor.execute(sql_delete_query, (record_id, ))
+    connection.commit()
+    connection.close()
+    return redirect(url_for('form1190'))
 
 if __name__ == '__main__':
     app.run(debug=True)

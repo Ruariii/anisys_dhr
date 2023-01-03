@@ -4,17 +4,17 @@
 {% block content %}
 <head>
     <meta charset="UTF-8">
-    <title>ASM_834_1111</title>
+    <title>ASM_834_1190</title>
 </head>
 <body>
 
 <div class="container-fluid">
-<h4> ASM_834_1111 device history record (DHR) </h4>
+<h4> ASM_834_1190 device history record (DHR) </h4>
 <hr><br>
 <div class="shadow-lg p-3 mb-5 bg-body rounded">
     <h5> Input to database: </h5>
     <hr>
-  <form method="POST" action="{{ url_for('form1111') }}" class="row g-1">
+  <form method="POST" action="{{ url_for('form1190') }}" class="row g-1">
         {{ form.hidden_tag() }}
       <div class="row g-3">
       <div class="col-md-4">
@@ -108,7 +108,7 @@
   </style>
 
     <div class="col text-center">
-        <form action="/delete_record1111/{{ lastID }}" method="DELETE">
+        <form action="/delete_record1190/{{ lastID }}" method="DELETE">
               <button type="submit"> Delete last record </button>
           </form>
     </div>
@@ -121,8 +121,7 @@
         <th>ID</th><th>Customer PO</th><th>Internal MFR</th><th>Product ref.</th>
           <th>Batch QTY ordered</th><th>Manufacturing verification ref.</th>
           <th>Manufactured by</th><th>Approved by</th><th>Additional comments</th>
-          <th>Date of manufacture</th><th>LOT number</th><th>Serial number</th>
-          <th>App code</th><th>Expiry date</th><th>GTIN</th><th>UDI</th>
+          <th>Date of manufacture</th><th>LOT number</th><th>Expiry date</th><th>GTIN</th><th>UDI</th>
     </tr>
     </thead>
     <tbody>
@@ -139,8 +138,6 @@
                 <td>{{ item.comments }}</td>
                 <td>{{ item.manufactureDATE }}</td>
                 <td>{{ item.LOTno }}</td>
-                <td>{{ item.SERIALno }}</td>
-                <td>{{ item.appCODE }}</td>
                 <td>{{ item.expiryDATE }}</td>
                 <td>{{ item.GTIN }}</td>
                 <td>{{ item.UDI }}</td>
