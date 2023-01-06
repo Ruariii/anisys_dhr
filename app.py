@@ -16,9 +16,14 @@ import pandas as pd
 
 app = Flask(__name__)
 app_ctx = app.app_context()
-engine = create_engine('mysql://root:jqtnnhj2@localhost/DHR_834_1190', pool_pre_ping=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:jqtnnhj2@localhost/DHR_834_1190'
+mysql_user = os.environ['MYSQL_USER']
+mysql_password = os.environ['MYSQL_PASSWORD']
+mysql_host = os.environ['MYSQL_HOST']
+mysql_database = os.environ['MYSQL_DATABASE']
+engine = create_engine(f'mysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}', pool_pre_ping=True)
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}'
 app.config['SECRET_KEY'] = os.urandom(12)
+app.config['ENV'] = 'development'
 db = SQLAlchemy()
 db.init_app(app)
 class dhr_asm_834_1111(db.Model):
@@ -239,7 +244,7 @@ def form1188():
         # Redirect to the form page
         return redirect(url_for('form1188'))
 
-    return render_template('1188.html', form=form, items=items, appCodeList=appCodeList, lastID=int(lastID.id))
+    return render_template('1188.html', form=form, items=items, lastID=int(lastID.id))
 
 @app.route('/delete_record1188/<record_id>', methods=['GET', 'DELETE'])
 def delete_record1188(record_id):
@@ -310,7 +315,7 @@ def form1190():
         # Redirect to the form page
         return redirect(url_for('form1190'))
 
-    return render_template('1190.html', form=form, items=items, appCodeList=appCodeList, lastID=int(lastID.id))
+    return render_template('1190.html', form=form, items=items, lastID=int(lastID.id))
 
 @app.route('/delete_record1190/<record_id>', methods=['GET', 'DELETE'])
 def delete_record1190(record_id):
