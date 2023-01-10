@@ -6,9 +6,9 @@ export MYSQL_HOST=localhost
 export MYSQL_DATABASE=DHR_834_1190
 
 
-export GOOGLESQL_PASSWORD='*6B3HVSY]*|]^(DA'
+export GOOGLESQL_PASSWORD="*6B3HVSY]*|]^(DA"
 export GOOGLESQL_USER=anisys-dhr
-export GOOGLESQL_USER_PASSWORD='am3#27nGyX-DmoD'
+export GOOGLESQL_USER_PASSWORD="am3#27nGyX-DmoD"
 export GOOGLESQL_IP=35.197.212.128
 export GOOGLESQL_DATABASE=dhr-protect-plus
 export GOOGLESQL_PROJECT=anisysdhr
