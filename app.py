@@ -21,47 +21,49 @@ from google.cloud.sql.connector import Connector, IPTypes
 app = Flask(__name__)
 
 #Local SQL
-mysql_user = os.environ['MYSQL_USER']
-mysql_password = os.environ['MYSQL_PASSWORD']
-mysql_host = os.environ['MYSQL_HOST']
-mysql_database = os.environ['MYSQL_DATABASE']
-engine = create_engine(f'mysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}', pool_pre_ping=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}'
-app.config['SECRET_KEY'] = os.urandom(12)
-app.config['ENV'] = 'development'
+#mysql_user = os.environ['MYSQL_USER']
+#mysql_password = os.environ['MYSQL_PASSWORD']
+#mysql_host = os.environ['MYSQL_HOST']
+#mysql_database = os.environ['MYSQL_DATABASE']
+#engine = create_engine(f'mysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}', pool_pre_ping=True)
+#app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}'
+#app.config['SECRET_KEY'] = os.urandom(12)
+#app.config['ENV'] = 'development'
 
 
 #Google cloud SQL
 
 # Python Connector database connection function
-def getconn():
-    with Connector() as connector:
-        conn = connector.connect(
-            os.environ['GOOGLESQL_CONNECTION'], # Cloud SQL Instance Connection Name
-            "pymysql",
-            user=os.environ['GOOGLESQL_USER'],
-            password=os.environ['GOOGLESQL_USER_PASSWORD'],
-            db=os.environ['GOOGLESQL_DATABASE']
-        )
-        return conn
+# def getconn():
+#     with Connector() as connector:
+#         conn = connector.connect(
+#             os.environ['GOOGLESQL_CONNECTION'], # Cloud SQL Instance Connection Name
+#             "pymysql",
+#             user=os.environ['GOOGLESQL_USER'],
+#             password=os.environ['GOOGLESQL_USER_PASSWORD'],
+#             db=os.environ['GOOGLESQL_DATABASE']
+#         )
+#         return conn
 
-#pool = sqlalchemy.create_engine(
-    #"mysql+pymysql://",
-    #creator=getconn,
-    #pool_pre_ping=True
-#)
+# pool = sqlalchemy.create_engine(
+#     "mysql+pymysql://",
+#     creator=getconn,
+#     pool_pre_ping=True
+# )
+
 
 
 # configure Flask-SQLAlchemy to use Python Connector
-#app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://"
-#app.config["SQLALCHEMY_POOL_RECYCLE"] = 280
-#app.config['SQLALCHEMY_POOL_TIMEOUT'] = 10
-#app.config['SECRET_KEY'] = os.urandom(12)
+app.config["SQLALCHEMY_POOL_RECYCLE"] = 280
+app.config['SQLALCHEMY_POOL_TIMEOUT'] = 10
+app.config['SECRET_KEY'] = os.urandom(12)
 
-#app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql + mysqldb://root:{googlesql_password}@{googlesql_ip}/{googlesql_database}?unix_socket=/cloudsql/{googlesql_project}:{googlesql_instance}'
-#uri = f"mysql+pymysql://{os.environ['GOOGLESQL_USER']}:{os.environ['GOOGLESQL_USER_PASSWORD']}@/{os.environ['GOOGLESQL_DATABASE']}?unix_socket={os.environ['GOOGLESQL_UNIX_SOCKET']}"
+uri = f"mysql+mysqldb://{os.environ['GOOGLESQL_USER']}:{os.environ['GOOGLESQL_USER_PASSWORD']}@{os.environ['GOOGLESQL_IP']}:{os.environ['DB_PORT']}/{os.environ['GOOGLESQL_DATABASE']}?unix_socket=/cloudsql/{os.environ['GOOGLESQL_PROJECT']}:{os.environ['GOOGLESQL_INSTANCE']}"
+engine = create_engine(uri, pool_pre_ping=True)
+app.config['SQLALCHEMY_DATABASE_URI'] = uri
 
-db = SQLAlchemy(app)
+with app.app_context():
+    db = SQLAlchemy(app)
 
 
 class dhr_asm_834_1111(db.Model):
