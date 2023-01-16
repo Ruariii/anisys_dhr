@@ -31,36 +31,45 @@ app = Flask(__name__)
 #app.config['ENV'] = 'development'
 
 
-#Google cloud SQL
 
-# Python Connector database connection function
-# def getconn():
-#     with Connector() as connector:
-#         conn = connector.connect(
-#             os.environ['GOOGLESQL_CONNECTION'], # Cloud SQL Instance Connection Name
-#             "pymysql",
-#             user=os.environ['GOOGLESQL_USER'],
-#             password=os.environ['GOOGLESQL_USER_PASSWORD'],
-#             db=os.environ['GOOGLESQL_DATABASE']
-#         )
-#         return conn
+# connect to google cloud SQL OR local SQL
+def connectDB():
+    try:
+        user = os.environ['GOOGLESQL_USER']
+        password = os.environ['GOOGLESQL_USER_PASSWORD']
+        host = os.environ['GOOGLESQL_IP']
+        port = os.environ['DB_PORT']
+        database = os.environ['GOOGLESQL_DATABASE']
+        project = os.environ['GOOGLESQL_PROJECT']
+        instance = os.environ['GOOGLESQL_INSTANCE']
+        uri = f"mysql+mysqldb://{user}:{password}@{host}:{port}/{database}?unix_socket=/cloudsql/{project}:{instance}"
+        engine = create_engine(uri, pool_pre_ping=True)
+        app.config['SQLALCHEMY_DATABASE_URI'] = uri
+        #Test connection to database
+        connection = mysql.connector.connect(user=user, password=password, host=host, database=database)
+    except:
+        user = os.environ['MYSQL_USER']
+        password = os.environ['MYSQL_PASSWORD']
+        host = os.environ['MYSQL_HOST']
+        database = os.environ['MYSQL_DATABASE']
+        uri = f"mysql://{os.environ['MYSQL_USER']}:{os.environ['MYSQL_PASSWORD']}@{os.environ['MYSQL_HOST']}/{os.environ['MYSQL_DATABASE']}"
+        engine = create_engine(uri, pool_pre_ping=True)
+        app.config['SQLALCHEMY_DATABASE_URI'] = uri
+        #Test connection to database
+        connection = mysql.connector.connect(user=user, password=password, host=host, database=database)
+        
+    return engine, user, password, host, database
 
-# pool = sqlalchemy.create_engine(
-#     "mysql+pymysql://",
-#     creator=getconn,
-#     pool_pre_ping=True
-# )
 
 
-
-# configure Flask-SQLAlchemy to use Python Connector
+engine, user, password, host, database = connectDB()
 app.config["SQLALCHEMY_POOL_RECYCLE"] = 280
 app.config['SQLALCHEMY_POOL_TIMEOUT'] = 10
 app.config['SECRET_KEY'] = os.urandom(12)
 
-uri = f"mysql+mysqldb://{os.environ['GOOGLESQL_USER']}:{os.environ['GOOGLESQL_USER_PASSWORD']}@{os.environ['GOOGLESQL_IP']}:{os.environ['DB_PORT']}/{os.environ['GOOGLESQL_DATABASE']}?unix_socket=/cloudsql/{os.environ['GOOGLESQL_PROJECT']}:{os.environ['GOOGLESQL_INSTANCE']}"
-engine = create_engine(uri, pool_pre_ping=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = uri
+# uri = f"mysql+mysqldb://{os.environ['GOOGLESQL_USER']}:{os.environ['GOOGLESQL_USER_PASSWORD']}@{os.environ['GOOGLESQL_IP']}:{os.environ['DB_PORT']}/{os.environ['GOOGLESQL_DATABASE']}?unix_socket=/cloudsql/{os.environ['GOOGLESQL_PROJECT']}:{os.environ['GOOGLESQL_INSTANCE']}"
+# engine = create_engine(uri, pool_pre_ping=True)
+# app.config['SQLALCHEMY_DATABASE_URI'] = uri
 
 with app.app_context():
     db = SQLAlchemy(app)
@@ -211,7 +220,7 @@ def form1111():
 @app.route('/delete_record1111/<record_id>', methods=['GET', 'DELETE'])
 def delete_record1111(record_id):
     #connect to database
-    connection = mysql.connector.connect(user='root', password='jqtnnhj2', host='localhost', database='DHR_834_1190')
+    connection = mysql.connector.connect(user=user, password=password, host=host, database=database)
     cursor = connection.cursor()
     sql_delete_query = """DELETE FROM dhr_asm_834_1111 WHERE id = %s"""
     cursor.execute(sql_delete_query, (record_id, ))
@@ -282,7 +291,7 @@ def form1188():
 @app.route('/delete_record1188/<record_id>', methods=['GET', 'DELETE'])
 def delete_record1188(record_id):
     #connect to database
-    connection = mysql.connector.connect(user='root', password='jqtnnhj2', host='localhost', database='DHR_834_1190')
+    connection = mysql.connector.connect(user=user, password=password, host=host, database=database)
     cursor = connection.cursor()
     sql_delete_query = """DELETE FROM dhr_asm_834_1188 WHERE id = %s"""
     cursor.execute(sql_delete_query, (record_id, ))
@@ -353,7 +362,7 @@ def form1190():
 @app.route('/delete_record1190/<record_id>', methods=['GET', 'DELETE'])
 def delete_record1190(record_id):
     #connect to database
-    connection = mysql.connector.connect(user='root', password='jqtnnhj2', host='localhost', database='DHR_834_1190')
+    connection = mysql.connector.connect(user=user, password=password, host=host, database=database)
     cursor = connection.cursor()
     sql_delete_query = """DELETE FROM dhr_asm_834_1190 WHERE id = %s"""
     cursor.execute(sql_delete_query, (record_id, ))
